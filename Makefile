@@ -6,8 +6,9 @@ VPATH = .:CMSIS:StdPeriph
 
 # Object files
 OBJECTS = 	startup_stm32f30x.o system_stm32f30x.o main.o adc.o \
+			amrx.o sdr.o \
 			stm32f30x_gpio.o stm32f30x_misc.o stm32f30x_rcc.o \
-			stm32f30x_dma.o stm32f30x_adc.o sdr.o \
+			stm32f30x_dma.o stm32f30x_adc.o \
 			arm_biquad_cascade_df1_f32.o \
 			arm_biquad_cascade_df1_init_f32.o
 

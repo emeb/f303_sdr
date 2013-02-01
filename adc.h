@@ -8,6 +8,8 @@
 
 #include "stm32f30x.h"
 
+#define ADC_BUFSZ 128
+
 void setup_adc(void);
 
 #endif
