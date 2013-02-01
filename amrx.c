@@ -8,10 +8,17 @@
 #include "arm_math.h"
 #include "amrx.h"
 #include "Sine.h"
-#include "adc.h"
+
+// uncomment this line to use optimized assembly for ddc function
+//#define USE_DDC_ASSY
+#ifdef USE_DDC_ASSY
 #include "ddc.h"
+#endif
 
 uint32_t phs, frq;
+
+/* duplicate of macro in adc.h */
+#define ADC_BUFSZ 128
 
 /* coarse tuner array is (I1:I0), (Q1:Q0), (I3:I2), ... */
 uint32_t LO[ADC_BUFSZ/2] __attribute__ ((aligned (8)));
@@ -73,25 +80,36 @@ void set_coarse_freq(uint16_t bin)
 	}
 }
 
-/* disabled for now since I cba to do dual implementation */
-#if 0
+#ifndef USE_DDC_ASSY
 /* tune & integrate - C version of what assembly routine does */
-void sdr_c(int16_t *idx, int16_t *lo_ptr, int32_t *si, int32_t *sq)
+void ddc_c(int16_t *idx, int16_t *lo_ptr, int32_t *si, int32_t *sq)
  __attribute__ ((section (".ccmram")));
-void sdr_c(int16_t *idx, int16_t *lo_ptr, int32_t *si, int32_t *sq)
+void ddc_c(int16_t *idx, uint32_t *lo_ptr, int32_t *si, int32_t *sq)
 {
-	int32_t tmp_if, sumi = 0, sumq = 0;
+	int16_t i1, i2, l1, l2;
+	int32_t tmp_lo, sumi = 0, sumq = 0;
 	
 	/* normal loop */
 	uint32_t i;
-	for(i=0;i<ADC_BUFSZ/2;i++)
+	for(i=0;i<ADC_BUFSZ/2;i+=2)
 	{
 		/* Get real input signed */
-		tmp_if = *idx++;
+		i1 = *idx++;
+		i2 = *idx++;
+			
+		/* Unpack I LO components */
+		l1 = *lo_ptr & 0xffff;
+		l2 = *lo_ptr++ >> 16;
+			
+		/* Accumulate I */
+		sumi += i1 * l1 + i2 * l2;
+			
+		/* Unpack Q LO components */
+		l1 = *lo_ptr & 0xffff;
+		l2 = *lo_ptr++ >> 16;
 		
-		/* Accumulate */
-		sumi += tmp_if * *lo_ptr++;
-		sumq += tmp_if * *lo_ptr++;
+		/* Accumulate Q */
+		sumq += i1 * l1 + i2 * l2;
 	}
 	
 	/* return results */
@@ -106,9 +124,12 @@ void amrx(int16_t *idx)
 	int32_t sumi, sumq, fti, ftq, bbi, bbq, mag;
 	
 	/* Coarse Tune and Filter RF data */
-	//sdr_c(idx, LO, &sumi, &sumq);
+#ifdef USE_DDC_ASSY
+	ddc_c(idx, LO, &sumi, &sumq);
+#else		
 	ddc(idx, LO, &sumi, &sumq);
-	
+#endif
+		
 	/* Scale & Round off to make room for fine tune */
 	sumi = (sumi + DEC_RND)>>DEC_SHFT;
 	sumq = (sumq + DEC_RND)>>DEC_SHFT;
