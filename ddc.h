@@ -7,6 +7,6 @@
 #ifndef __ddc__
 #define __ddc__
 
-void ddc(int16_t *idx, int16_t *lo_ptr, int32_t *si, int32_t *sq);
+void ddc(int16_t *idx, uint32_t *lo_ptr, int32_t *si, int32_t *sq);
 
 #endif

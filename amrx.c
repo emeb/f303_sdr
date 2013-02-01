@@ -10,7 +10,7 @@
 #include "Sine.h"
 
 // uncomment this line to use optimized assembly for ddc function
-//#define USE_DDC_ASSY
+#define USE_DDC_ASSY
 #ifdef USE_DDC_ASSY
 #include "ddc.h"
 #endif
@@ -82,7 +82,7 @@ void set_coarse_freq(uint16_t bin)
 
 #ifndef USE_DDC_ASSY
 /* tune & integrate - C version of what assembly routine does */
-void ddc_c(int16_t *idx, int16_t *lo_ptr, int32_t *si, int32_t *sq)
+void ddc_c(int16_t *idx, uint32_t *lo_ptr, int32_t *si, int32_t *sq)
  __attribute__ ((section (".ccmram")));
 void ddc_c(int16_t *idx, uint32_t *lo_ptr, int32_t *si, int32_t *sq)
 {
@@ -124,7 +124,7 @@ void amrx(int16_t *idx)
 	int32_t sumi, sumq, fti, ftq, bbi, bbq, mag;
 	
 	/* Coarse Tune and Filter RF data */
-#ifdef USE_DDC_ASSY
+#ifndef USE_DDC_ASSY
 	ddc_c(idx, LO, &sumi, &sumq);
 #else		
 	ddc(idx, LO, &sumi, &sumq);
