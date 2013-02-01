@@ -1316,7 +1316,7 @@ extern "C"
 				  const arm_biquad_casd_df1_inst_f32 * S,
 				   float32_t * pSrc,
 				  float32_t * pDst,
-				  uint32_t blockSize);
+				  uint32_t blockSize) __attribute__ ((section (".ccmram")));
 
   /**
    * @brief  Initialization function for the floating-point Biquad cascade filter.

@@ -8,6 +8,7 @@
 #include "arm_math.h"
 #include "amrx.h"
 #include "Sine.h"
+#include "Window.h"
 
 // uncomment this line to use optimized assembly for ddc function
 #define USE_DDC_ASSY
@@ -64,19 +65,22 @@ void init_amrx(void)
 void set_coarse_freq(uint16_t bin)
 {
 	uint16_t i;
-	uint32_t tmp;
+	uint32_t tmp1, tmp2;
 	
 	/* limit the number of possible frequencies */
 	bin &= ((ADC_BUFSZ/4)-1);
+	bin = -bin;
 	
 	/* fill the arrary */
 	for(i=0;i<ADC_BUFSZ/2;i+=2)
 	{
 		/* can scale by window func too for better passband */
-		tmp = Sine[(bin*(i<<4)+256)&1023];
-		LO[i+0] = tmp | (Sine[(bin*((i+1)<<4)+256)&1023]<<16);
-		tmp = Sine[(bin*(i<<4))&1023];
-		LO[i+1] = tmp | (Sine[(bin*((i+1)<<4))&1023]<<16);
+		tmp1 = (Sine[(bin*(i<<4)+256)&1023]*Window[i]+1024)>>11;
+		tmp2 = (Sine[(bin*((i+1)<<4)+256)&1023]*Window[i]+1024)>>11;
+		LO[i+0] = (tmp1 & 0xffff) | (tmp2<<16);
+		tmp1 = (Sine[(bin*(i<<4))&1023]*Window[i]+1024)>>11;
+		tmp2 = (Sine[(bin*((i+1)<<4))&1023]*Window[i]+1024)>>11;
+		LO[i+1] = (tmp1 & 0xffff) | (tmp2<<16);
 	}
 }
 
