@@ -9,6 +9,7 @@
 #include "amrx.h"
 #include "Sine.h"
 #include "adc.h"
+#include "ddc.h"
 
 uint32_t phs, frq;
 
@@ -106,7 +107,7 @@ void amrx(int16_t *idx)
 	
 	/* Coarse Tune and Filter RF data */
 	//sdr_c(idx, LO, &sumi, &sumq);
-	sdr_s(idx, LO, &sumi, &sumq);
+	ddc(idx, LO, &sumi, &sumq);
 	
 	/* Scale & Round off to make room for fine tune */
 	sumi = (sumi + DEC_RND)>>DEC_SHFT;

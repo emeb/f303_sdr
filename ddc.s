@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file      sdr.s
+  * @file      ddc.s
   * @author    E. Brombaugh
   * @version   V1.0.0
-  * @date      29-January-2013
-  * @brief     SDR subroutine to test assembly. 
+  * @date      31-January-2013
+  * @brief     Tuner/Decimator function in optimized assembly. 
   ******************************************************************************
   */
     
@@ -13,16 +13,16 @@
 	.fpu softvfp
 	.thumb
 
-	.global		sdr_s
+	.global		ddc
 	.section	.ccmram, "ax", %progbits
-	.type		sdr_s STT_FUNC
+	.type		ddc STT_FUNC
 	
 	/* enter with:
 	/* r0 = ptr to RF adc data */
 	/* r1 = ptr to LO data */
 	/* r2 = ptr to i sum */
 	/* r3 = ptr to q sum */
-sdr_s:  
+ddc:  
 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp}	/* save regs */
 	mov		r8, #0				/* init i acc */
 	mov		r9, #0				/* init q acc */
@@ -226,4 +226,4 @@ sdr_s:
 	bx		lr
 	nop
 		
-.size  sdr_s, .-sdr_s
+.size  ddc, .-ddc
