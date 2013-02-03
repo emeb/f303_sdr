@@ -9,6 +9,7 @@
 #include "amrx.h"
 #include "Sine.h"
 #include "Window.h"
+#include "iir_coeffs.h"
 
 // uncomment this line to use optimized assembly for ddc function
 #define USE_DDC_ASSY
@@ -33,9 +34,8 @@ float32_t iir_inbuf[IIR_BUFSZ], iir_outbuf[IIR_BUFSZ];
 int16_t iir_wptr;
 
 /* IIR filter state */
-#define NUM_IIRS 3
 arm_biquad_casd_df1_inst_f32 S;
-float32_t pCoeffs[NUM_IIRS*5], pState[NUM_IIRS*4];
+float32_t pState[NUM_IIRS*4];
 
 /* initialize the amrx functions */
 void init_amrx(void)
