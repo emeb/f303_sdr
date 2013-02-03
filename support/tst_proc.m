@@ -13,14 +13,17 @@ in_t = (0:(sz-1))/Fs;
 %% Front End setup
 % params
 Ftune = 1.0e6;
-Dec_Rate = 256;
+Int_Len = 256;
+OS = 1;
+Dec_Rate = Int_Len/OS;
 Fs_dec = Fs/Dec_Rate;
-Coarse_Bin = floor(Ftune/Fs_dec);
-Ffine = Ftune - Fs_dec*Coarse_Bin;
+Fs_itg = Fs/Int_Len;
+Coarse_Bin = floor(Ftune/Fs_itg);
+Ffine = Ftune - Fs_itg*Coarse_Bin;
 Phs_Inc = 2^32*Ffine/(Fs_dec);
 
 % build coarse tune table with window
-LO = exp(1i*2*pi*Coarse_Bin*(0:(Dec_Rate-1))/Dec_Rate);
+LO = exp(1i*2*pi*Coarse_Bin*(0:(Int_Len-1))/Int_Len);
 %win = blackmanharris(Dec_Rate);
 %LO = LO .* win';
 
@@ -43,10 +46,10 @@ for idx = 1:length(freq);
 	in_sig = cos(2*pi*Fcarrier*in_t).*(Mod_amp*sin(2*pi*Fmodulation*in_t)+1)/2;
 
 	% Iterate over test signal, tuning & decimating
-	dec_sig = zeros(1,ceil(sz/Dec_Rate));
+	dec_sig = zeros(1,ceil(sz/Dec_Rate-OS));
 	oidx = 1;
-	for iidx = 1:Dec_Rate:sz
-		dec_sig(oidx) = sum(LO .* in_sig(iidx:(iidx+Dec_Rate-1)));
+	for iidx = 1:Dec_Rate:(sz-(OS*Dec_Rate))
+		dec_sig(oidx) = sum(LO .* in_sig(iidx:(iidx+Int_Len-1)));
 		oidx = oidx+1;
 	end
 
@@ -64,7 +67,8 @@ for idx = 1:length(freq);
 	am_filt = filter(b, a, am_raw);
 
 	% measure
-	amp(idx) = max(am_filt(end/2:end)) - min(am_filt(end/2:end));
+	meas_intvl = floor(length(am_filt)/2):length(am_filt);
+	amp(idx) = max(am_filt(meas_intvl)) - min(am_filt(meas_intvl));
 end
 
 %% plot out response
