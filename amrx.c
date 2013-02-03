@@ -155,7 +155,7 @@ void amrx(int16_t *idx)
 		mag = bbq + (bbi>>1);
 	
 	/* save magnitude as float in filter buffer */
-	iir_inbuf[iir_wptr] = mag;
+	iir_inbuf[iir_wptr] = (float32_t)mag * IIR_GAIN;
 	iir_wptr = (iir_wptr+1)&IIR_MASK;
 	
 	/* run filter when we have 4 samples */
