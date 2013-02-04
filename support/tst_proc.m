@@ -2,7 +2,7 @@
 % 02-03-2013 E. Brombaugh
 
 %% ADC sampling rate
-Fs = 72e6/(12.5+2.5);
+Fs = 72e6/(12.5+7.5);
 
 %% Test Signal params
 Fmodulation = 1e3;
@@ -27,7 +27,7 @@ Phs_Inc = 2^32*Ffine/Fs_dec;
 LO = exp(1i*2*pi*Coarse_Bin*(0:(Int_Len-1))/Int_Len);
 win = blackmanharris(Int_Len);
 %win = hann(Int_Len);
-LO = LO .* win';
+LO = LO .* win;
 
 % Fine tuning
 Phs = mod(cumsum(ones(1,sz/Dec_Rate-OS)*Phs_Inc),2^32)/2^32;
@@ -36,7 +36,8 @@ FLO = exp(1i*2*pi*Phs);
 % IIR filter
 Fcutoff = 5e3;
 order = 6;
-[b, a] = maxflat(order, order, Fcutoff/(Fs_dec/2));
+%[b, a] = maxflat(order, order, Fcutoff/(Fs_dec/2));
+[b, a] = butter(order, Fcutoff/(Fs_dec/2));
 
 %% Sweep Carrier Frequency
 swp_stps = 1024;
